@@ -39,7 +39,15 @@ import {
       try {
         const filteredPath = await filterImageFromURL(imageURL);
         res.sendFile(filteredPath);
-        // await deleteLocalFiles([filteredPath]);
+
+        res.on('finish', async () => {
+          try {
+            await deleteLocalFiles([filteredPath]);
+          } catch (err) {
+            console.log('error removing ', filteredPath);
+          }
+        });
+
         return;
       } catch (error) {
         return res.status(422).send({
