@@ -1,10 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import {
-  filterImageFromURL,
-  deleteLocalFiles,
-  isValidImageURL,
-} from './util/util';
+
+import { filterImageFromURL, deleteLocalFiles } from './util/util';
 
 (async () => {
   // Init the Express application
@@ -34,30 +31,27 @@ import {
 
   app.get('/filteredimage', async (req, res) => {
     const imageURL = req.query['image_url'] || '';
+    
 
-    if (isValidImageURL(imageURL)) {
-      try {
-        const filteredPath = await filterImageFromURL(imageURL);
-        res.sendFile(filteredPath);
+    try {
+      const filteredPath = await filterImageFromURL(imageURL);
+      res.sendFile(filteredPath);
 
-        res.on('finish', async () => {
-          try {
-            await deleteLocalFiles([filteredPath]);
-          } catch (err) {
-            console.log('error removing ', filteredPath);
-          }
-        });
+      res.on('finish', async () => {
+        try {
+          await deleteLocalFiles([filteredPath]);
+        } catch (err) {
+          console.log('error removing ', filteredPath);
+        }
+      });
 
-        return;
-      } catch (error) {
-        return res.status(422).send({
-          error:
-            'There was an error processing the image URL. Kindly check the URL and try again.',
-        });
-      }
+      return;
+    } catch (error) {
+      return res.status(422).send({
+        error:
+          'There was an error processing the image URL. Kindly check the URL and try again.',
+      });
     }
-
-    res.status(400).send({ error: 'Invalid image url provided' });
   });
 
   //! END @TODO1
